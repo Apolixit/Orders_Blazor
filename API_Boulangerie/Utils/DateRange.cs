@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace API_Boulangerie.Utils
+namespace API_Orders.Utils
 {
     public class DateRange
     {

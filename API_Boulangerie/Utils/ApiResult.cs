@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace API_Boulangerie.Utils
+namespace API_Orders.Utils
 {
     public class ApiResult
     {

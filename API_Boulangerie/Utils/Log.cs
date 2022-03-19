@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace API_Boulangerie
+namespace API_Orders
 {
     public class Log
     {

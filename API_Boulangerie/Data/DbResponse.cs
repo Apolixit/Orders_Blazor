@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace API_Boulangerie.Data
+namespace API_Orders.Data
 {
     public class DbResponse<T>
     {
@@ -17,21 +17,21 @@ namespace API_Boulangerie.Data
     }
 
     public enum DbState
-    {
+    {   
         /// <summary>
-        /// Tout s'est bien passé
+        /// Everything is ok
         /// </summary>
         OK,
         /// <summary>
-        /// L'élément passé en paramètre n'a pas été trouvé dans la base de donnée
+        /// The element hasn't been found in database
         /// </summary>
         NOT_FOUND,
         /// <summary>
-        /// Une erreur est survenue lors de la communication avec la BDD (voir les logs)
+        /// Error communication with database
         /// </summary>
         ERROR,
         /// <summary>
-        /// L'élément passé en paramètre n'est pas cohérent (null ou bien id < 0)
+        /// Incoherent parameter (null or also id < 0)
         /// </summary>
         INVALID_INPUT
     }

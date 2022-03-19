@@ -3,10 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace API_Boulangerie.Services
+namespace API_Orders.Services
 {
     public class ClientServices : IClientServices
     {
+        private static ClientServices instance = null;
+
+        public static ClientServices Instance
+        {
+            get
+            {
+                if (instance == null) instance = new ClientServices();
+                return instance;
+            }
+        }
+
+        private ClientServices() { }
+
+
         /// <summary>
         /// Récupère la liste complete des clients non supprimé
         /// </summary>
@@ -17,7 +31,7 @@ namespace API_Boulangerie.Services
             IEnumerable<Client> clients = null;
             try
             {
-                using (var db = new Data.BoulangerieContext())
+                using (var db = new Data.BakeryContext())
                 {
                     clients = db.Clients
                                 .Where(x => x.Active())
@@ -26,7 +40,7 @@ namespace API_Boulangerie.Services
             } catch(Exception ex)
             {
                 _status = Data.DbState.ERROR;
-                Log.logger.Error($"[ClientServices - GetAll()] Erreur lors de la récupération des données : {ex}");
+                Log.logger.Error($"[ClientServices - GetAll()] Error while fetching data : {ex}");
             }
             return new Data.DbResponse<IEnumerable<Client>>(clients, _status);
         }
@@ -43,7 +57,7 @@ namespace API_Boulangerie.Services
 
             try
             {
-                using (var db = new Data.BoulangerieContext())
+                using (var db = new Data.BakeryContext())
                 {
                     client = db.Clients
                                 .Where(x => x.Active())
@@ -52,7 +66,7 @@ namespace API_Boulangerie.Services
             } catch(Exception ex)
             {
                 _status = Data.DbState.ERROR;
-                Log.logger.Error($"[ClientServices - Get(id)] Erreur lors de la récupération des données : {ex}");
+                Log.logger.Error($"[ClientServices - Get(id)] Error while fetching data : {ex}");
             }
 
             return new Data.DbResponse<Client>(client, _status);
@@ -70,19 +84,19 @@ namespace API_Boulangerie.Services
 
             try
             {
-                using (var db = new Data.BoulangerieContext())
+                using (var db = new Data.BakeryContext())
                 {
                     lClient = db.Clients
-                                .Where(x => (!string.IsNullOrEmpty(criteria.nom) && x.nomComplet.Contains(criteria.nom))
-                                            || (!string.IsNullOrEmpty(criteria.telephone) && x.phoneNumber.Contains(criteria.telephone))
-                                            || (!string.IsNullOrEmpty(criteria.email) && x.email.Contains(criteria.email)))
+                                .Where(x => (!string.IsNullOrEmpty(criteria.nom) && x.FullName.Contains(criteria.nom))
+                                            || (!string.IsNullOrEmpty(criteria.telephone) && x.PhoneNumber.Contains(criteria.telephone))
+                                            || (!string.IsNullOrEmpty(criteria.email) && x.Email.Contains(criteria.email)))
                                 .ToList();
                 }
             }
             catch (Exception ex)
             {
                 _status = Data.DbState.ERROR;
-                Log.logger.Error($"[ClientServices - Search()] Erreur lors de la récupération des données : {ex}");
+                Log.logger.Error($"[ClientServices - Search()] Error while fetching data : {ex}");
             }
 
             return new Data.DbResponse<IEnumerable<Client>>(lClient, _status);
@@ -101,7 +115,7 @@ namespace API_Boulangerie.Services
 
             try
             {
-                using (var db = new Data.BoulangerieContext())
+                using (var db = new Data.BakeryContext())
                 {
                     if (!client.Exist())
                     {
@@ -121,7 +135,7 @@ namespace API_Boulangerie.Services
             catch (Exception ex)
             {
                 _status = Data.DbState.ERROR;
-                Log.logger.Error($"[ClientServices - Save(client)] Erreur lors de la récupération des données : {ex}");
+                Log.logger.Error($"[ClientServices - Save(client)] Error while fetching data : {ex}");
             }
             
             return new Data.DbResponse<Client>(client, _status);
@@ -139,7 +153,7 @@ namespace API_Boulangerie.Services
 
             try
             {
-                using (var db = new Data.BoulangerieContext())
+                using (var db = new Data.BakeryContext())
                 {
                     db.Clients.Remove(client);
                     db.SaveChanges();
@@ -148,7 +162,7 @@ namespace API_Boulangerie.Services
             catch (Exception ex)
             {
                 _status = Data.DbState.ERROR;
-                Log.logger.Error($"[ClientServices - Save(client)] Erreur lors de la récupération des données : {ex}");
+                Log.logger.Error($"[ClientServices - Save(client)] Error while fetching data : {ex}");
             }
 
             return new Data.DbResponse<Client>(client, _status);
@@ -166,17 +180,17 @@ namespace API_Boulangerie.Services
             
             try
             {
-                using(var db = new Data.BoulangerieContext())
+                using(var db = new Data.BakeryContext())
                 {
                     var dbClient = db.Clients.SingleOrDefault(x => x.ID_Client == client.ID_Client);
                     if (dbClient == null) return new Data.DbResponse<Client>(client, Data.DbState.NOT_FOUND);
-                    dbClient.disabled = true;
+                    dbClient.Disabled = true;
                     db.SaveChanges();
                 }
             } catch(Exception ex)
             {
                 _status = Data.DbState.ERROR;
-                Log.logger.Error($"[ClientServices - Disable] Erreur lors de la récupération des données : {ex}");
+                Log.logger.Error($"[ClientServices - Disable] Error while fetching data : {ex}");
             }
 
             return new Data.DbResponse<Client>(client, _status);

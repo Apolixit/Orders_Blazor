@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace API_Boulangerie.Data
+namespace API_Orders.Data
 {
     interface ICopy<T>
     {

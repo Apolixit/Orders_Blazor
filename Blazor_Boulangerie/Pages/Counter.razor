@@ -1,0 +1,33 @@
+﻿@page "/counter"
+@using Shared_Orders.DTO
+@inject IScheduleRepository scheduleRepo;
+
+<PageTitle>Counter</PageTitle>
+
+<h1>Counter</h1>
+
+<p role="status">
+    Current count: @currentCount <br />
+    @if(scheduleDTO != null)
+    {
+        <text>@scheduleDTO?.summary?.FirstOrDefault()?.nbOrders</text>
+    }
+</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+@code {
+    private int currentCount = 0;
+    private ScheduleDTO scheduleDTO { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        scheduleDTO = await scheduleRepo.GetByDate(new DateTime(2019, 12, 29));
+        //StateHasChanged();
+    }
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+}

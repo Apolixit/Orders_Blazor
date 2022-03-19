@@ -2,38 +2,51 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace API_Boulangerie.Services
+namespace API_Orders.Services
 {
-    public class ServicesFactory
+    public class ServicesFactory : IServiceFactory
     {
-        public IProduitServices ProduitServices {
-            get {
-                return new ProduitServices();
-            }
-        }
-
-        public ICommandeServices CommandesServices
+        private static ServicesFactory instance = null;
+        public static ServicesFactory Instance
         {
             get
             {
-                return new CommandeServices();
+                if (instance == null) instance = new ServicesFactory();
+                return instance;
+            } 
+        }
+
+        private ServicesFactory() { }
+
+        public IProductServices Produits {
+            get 
+            {
+                return ProductServices.Instance;
             }
         }
 
-        public IClientServices ClientServices
+        public IOrderServices Commandes
         {
             get
             {
-                return new ClientServices();
+                return OrderServices.Instance;
             }
         }
 
-        //public IUtilsServices UtilsServices
-        //{
-        //    get
-        //    {
-        //        return new UtilsServices();
-        //    }
-        //}
+        public IClientServices Clients
+        {
+            get
+            {
+                return ClientServices.Instance;
+            }
+        }
+
+        public IUtilsServices Utils
+        {
+            get
+            {
+                return UtilsServices.Instance;
+            }
+        }
     }
 }
