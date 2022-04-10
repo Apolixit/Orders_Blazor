@@ -6,10 +6,10 @@ namespace API_Orders.Data
 {
     public class DbResponse<T>
     {
-        public T data { get; }
+        public T? data { get; }
         public DbState statut { get; }
 
-        public DbResponse(T data_, DbState statut_)
+        public DbResponse(T? data_, DbState statut_)
         {
             data = data_;
             statut = statut_;

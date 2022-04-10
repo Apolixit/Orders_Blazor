@@ -8,8 +8,8 @@ namespace API_Orders.Controllers.api
     public class ApiController : ControllerBase
     {
         protected static ServicesFactory _services => ServicesFactory.Instance;
-        protected const string modelEmpty = "Les données sont incorrects";
-        protected const string internalError = "Une erreur est survenue";
+        protected const string modelEmpty = "Unvalid data";
+        protected const string internalError = "Something wrong happened";
 
         protected ApiResult serviceCall(DbState statut)
         {

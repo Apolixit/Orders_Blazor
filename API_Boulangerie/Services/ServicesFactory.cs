@@ -18,7 +18,7 @@ namespace API_Orders.Services
 
         private ServicesFactory() { }
 
-        public IProductServices Produits {
+        public GetFlatProductCategory Produits {
             get 
             {
                 return ProductServices.Instance;

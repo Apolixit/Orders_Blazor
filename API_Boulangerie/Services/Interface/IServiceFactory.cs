@@ -4,7 +4,7 @@
     {
         IOrderServices Commandes { get; }
         IClientServices Clients { get; }
-        IProductServices Produits { get; }
+        GetFlatProductCategory Produits { get; }
         IUtilsServices Utils { get; }
     }
 }

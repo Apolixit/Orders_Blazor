@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using API_Orders.Data;
+using API_Orders.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace API_Orders.Services
 {
-    public class ProductServices : IProductServices
+    public class ProductServices : GetFlatProductCategory
     {
         private static ProductServices? instance = null;
         public static ProductServices Instance
@@ -27,18 +28,18 @@ namespace API_Orders.Services
         /// Retour la liste complète de tout les produits
         /// </summary>
         /// <returns></returns>
-        public DbResponse<IEnumerable<Product>> GetAll()
+        public async Task<DbResponse<IEnumerable<Product>>> GetAll()
         {
-            IEnumerable<Product> produits = null;
+            IEnumerable<Product>? produits = null;
             Data.DbState _status = Data.DbState.OK;
 
             try
             {
                 using (var db = new Data.BakeryContext())
                 {
-                    produits = db.Products
+                    produits = await db.Products
                                 .Include(x => x.Category)
-                                .ToList();
+                                .ToListAsync();
                 }
             }
             catch (Exception ex)
@@ -55,16 +56,16 @@ namespace API_Orders.Services
         /// </summary>
         /// <param name="ID_Produit"></param>
         /// <returns></returns>
-        public DbResponse<Product> Get(int ID_Produit)
+        public async Task<DbResponse<Product>> Get(int ID_Produit)
         {
-            Product produit = null;
-            DbState _status = Data.DbState.OK;
+            Product? produit = null;
+            DbState _status = DbState.OK;
 
             try
             {
-                using (var db = new Data.BakeryContext())
+                using (var db = new BakeryContext())
                 {
-                    produit = db.Products.FirstOrDefault(x => x.ID_Product == ID_Produit);
+                    produit = await db.Products.FirstOrDefaultAsync(x => x.ID_Product == ID_Produit);
                 }
             }
             catch (Exception ex)
@@ -73,7 +74,7 @@ namespace API_Orders.Services
                 Log.logger.Error($"[ProduitServices - Get] Erreur lors de la récupération des données : {ex}");
             }
 
-            return new Data.DbResponse<Product>(produit, _status);
+            return new DbResponse<Product>(produit, _status);
         }
 
         /// <summary>
@@ -81,16 +82,19 @@ namespace API_Orders.Services
         /// </summary>
         /// <param name="criteria"></param>
         /// <returns></returns>
-        public Data.DbResponse<IEnumerable<Product>> Search(SearchArgument criteria)
+        public async Task<DbResponse<IEnumerable<Product>>> Search(SearchArgument criteria)
         {
-            IEnumerable<Product> produits = null;
+            IEnumerable<Product>? produits = null;
             Data.DbState _status = Data.DbState.OK;
 
             try
             {
                 using (var db = new Data.BakeryContext())
                 {
-                    produits = db.Products.Where(x => String.IsNullOrEmpty(criteria.nom) || x.Name.Contains(criteria.nom)).ToList();
+                    var check = new CheckString();
+                    produits = await db.Products
+                                    .Where(x => check.Contains(x.Name, criteria.name))
+                                    .ToListAsync();
                 }
             }
             catch (Exception ex)
@@ -99,7 +103,7 @@ namespace API_Orders.Services
                 Log.logger.Error($"[ProduitServices - Search] Erreur lors de la récupération des données : {ex}");
             }
 
-            return new Data.DbResponse<IEnumerable<Product>>(produits, _status);
+            return new DbResponse<IEnumerable<Product>>(produits, _status);
         }
 
         /// <summary>
@@ -108,7 +112,7 @@ namespace API_Orders.Services
         /// </summary>
         /// <param name="produit"></param>
         /// <returns></returns>
-        public Data.DbResponse<Product> Save(Product produit)
+        public async Task<DbResponse<Product>> Save(Product produit)
         {
             if (produit == null) return new Data.DbResponse<Product>(produit, Data.DbState.INVALID_INPUT);
             Data.DbState _status = Data.DbState.OK;
@@ -137,7 +141,7 @@ namespace API_Orders.Services
                     {
                         db.Entry(produit.PortionProduct).State = Microsoft.EntityFrameworkCore.EntityState.Unchanged;
                     }
-                    db.SaveChanges();
+                    await db.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
@@ -153,7 +157,7 @@ namespace API_Orders.Services
         /// Supprime un produit en base
         /// </summary>
         /// <param name="produit"></param>
-        public Data.DbResponse<Product> Delete(Product produit)
+        public async Task<DbResponse<Product>> Delete(Product produit)
         {
             if (produit == null) return new Data.DbResponse<Product>(produit, Data.DbState.INVALID_INPUT);
             Data.DbState _status = Data.DbState.OK;
@@ -163,7 +167,7 @@ namespace API_Orders.Services
                 using (var db = new Data.BakeryContext())
                 {
                     db.Products.Remove(produit);
-                    db.SaveChanges();
+                    await db.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
@@ -182,16 +186,16 @@ namespace API_Orders.Services
         /// </summary>
         /// <param name="ID_Cat"></param>
         /// <returns></returns>
-        public Data.DbResponse<CategoryProduct> GetCat(int ID_Cat)
+        public async Task<DbResponse<CategoryProduct>> GetCat(int ID_Cat)
         {
-            CategoryProduct cat = null;
+            CategoryProduct? cat = null;
             Data.DbState _status = Data.DbState.OK;
 
             try
             {
                 using (var db = new Data.BakeryContext())
                 {
-                    cat = db.CategoryProduct.FirstOrDefault(x => x.ID_Category == ID_Cat);
+                    cat = await db.CategoryProduct.FirstOrDefaultAsync(x => x.ID_Category == ID_Cat);
                 }
             }
             catch (Exception ex)
@@ -200,7 +204,7 @@ namespace API_Orders.Services
                 Log.logger.Error($"[ProduitServices - GetCat] Erreur lors de la récupération des données : {ex}");
             }
 
-            return new Data.DbResponse<CategoryProduct>(cat, _status);
+            return new DbResponse<CategoryProduct>(cat, _status);
         }
 
         /// <summary>
@@ -209,7 +213,7 @@ namespace API_Orders.Services
         /// </summary>
         /// <param name="cat"></param>
         /// <returns></returns>
-        public Data.DbResponse<CategoryProduct> SaveCat(CategoryProduct cat)
+        public async Task<DbResponse<CategoryProduct>> SaveCat(CategoryProduct cat)
         {
             if (cat == null) return new Data.DbResponse<CategoryProduct>(cat, Data.DbState.INVALID_INPUT);
             Data.DbState _status = Data.DbState.OK;
@@ -437,7 +441,7 @@ namespace API_Orders.Services
         /// </summary>
         public class SearchArgument
         {
-            public string nom { get; set; }
+            public string name { get; set; }
         }
     }
 }

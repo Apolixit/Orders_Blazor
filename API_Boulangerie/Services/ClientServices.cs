@@ -1,4 +1,6 @@
-﻿using System;
+﻿using API_Orders.Utils;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,20 +24,20 @@ namespace API_Orders.Services
 
 
         /// <summary>
-        /// Récupère la liste complete des clients non supprimé
+        /// Get the whole list of non deleted client
         /// </summary>
         /// <returns></returns>
-        public Data.DbResponse<IEnumerable<Client>> GetAll()
+        public async Task<Data.DbResponse<IEnumerable<Client>>> GetAll()
         {
             Data.DbState _status = Data.DbState.OK;
-            IEnumerable<Client> clients = null;
+            IEnumerable<Client>? clients = null;
             try
             {
                 using (var db = new Data.BakeryContext())
                 {
-                    clients = db.Clients
-                                .Where(x => x.Active())
-                                .ToList();
+                    clients = await db.Clients
+                                .Where(x => !x.Disabled)
+                                .ToListAsync();
                 }
             } catch(Exception ex)
             {
@@ -46,22 +48,22 @@ namespace API_Orders.Services
         }
 
         /// <summary>
-        /// Retourne le client depuis son ID
+        /// Get the client from his ID
         /// </summary>
         /// <param name="ID_Client"></param>
         /// <returns></returns>
-        public Data.DbResponse<Client> Get(int ID_Client)
+        public async Task<Data.DbResponse<Client>> Get(int ID_Client)
         {
             Data.DbState _status = Data.DbState.OK;
-            Client client = null;
+            Client? client = null;
 
             try
             {
                 using (var db = new Data.BakeryContext())
                 {
-                    client = db.Clients
-                                .Where(x => x.Active())
-                                .SingleOrDefault(x => x.ID_Client == ID_Client);
+                    client = await db.Clients
+                                .Where(x => !x.Disabled)
+                                .SingleOrDefaultAsync(x => x.ID_Client == ID_Client);
                 }
             } catch(Exception ex)
             {
@@ -77,20 +79,22 @@ namespace API_Orders.Services
         /// </summary>
         /// <param name="criteria"></param>
         /// <returns></returns>
-        public Data.DbResponse<IEnumerable<Client>> Search(SearchArgument criteria)
+        public async Task<Data.DbResponse<IEnumerable<Client>>> Search(SearchArgument criteria)
         {
             Data.DbState _status = Data.DbState.OK;
-            IEnumerable<Client> lClient = null;
+            IEnumerable<Client>? lClient = null;
 
             try
             {
                 using (var db = new Data.BakeryContext())
                 {
-                    lClient = db.Clients
-                                .Where(x => (!string.IsNullOrEmpty(criteria.nom) && x.FullName.Contains(criteria.nom))
-                                            || (!string.IsNullOrEmpty(criteria.telephone) && x.PhoneNumber.Contains(criteria.telephone))
-                                            || (!string.IsNullOrEmpty(criteria.email) && x.Email.Contains(criteria.email)))
-                                .ToList();
+                    var check = new CheckString();
+                    lClient = await db.Clients
+                                        .Where(x => check.Contains(x.FullName, criteria.nom)
+                                                || check.Contains(x.PhoneNumber, criteria.telephone)
+                                                || check.Contains(x.Email, criteria.email)
+                                        )
+                                        .ToListAsync();
                 }
             }
             catch (Exception ex)
@@ -103,12 +107,12 @@ namespace API_Orders.Services
         }
 
         /// <summary>
-        /// Sauvegarde un client
-        /// Il peut d'agir d'une insertion ou d'une édition
+        /// Save a client
+        /// It could be insertion or update
         /// </summary>
         /// <param name="client"></param>
         /// <returns></returns>
-        public Data.DbResponse<Client> Save(Client client)
+        public async Task<Data.DbResponse<Client>> Save(Client client)
         {
             if (client == null) return new Data.DbResponse<Client>(client, Data.DbState.INVALID_INPUT);
             Data.DbState _status = Data.DbState.OK;
@@ -129,7 +133,7 @@ namespace API_Orders.Services
 
                         dbClient.Copy(client);
                     }
-                    db.SaveChanges();
+                    await db.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
@@ -142,11 +146,11 @@ namespace API_Orders.Services
         }
 
         /// <summary>
-        /// Supprime un client
+        /// Delete a client
         /// </summary>
         /// <param name="client"></param>
         /// <returns></returns>
-        public Data.DbResponse<Client> Delete(Client client)
+        public async Task<Data.DbResponse<Client>> Delete(Client client)
         {
             if (client == null) return new Data.DbResponse<Client>(client, Data.DbState.INVALID_INPUT);
             Data.DbState _status = Data.DbState.OK;
@@ -156,7 +160,7 @@ namespace API_Orders.Services
                 using (var db = new Data.BakeryContext())
                 {
                     db.Clients.Remove(client);
-                    db.SaveChanges();
+                    await db.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
@@ -173,7 +177,7 @@ namespace API_Orders.Services
         /// </summary>
         /// <param name="client"></param>
         /// <returns></returns>
-        public Data.DbResponse<Client> Disable(Client client)
+        public async Task<Data.DbResponse<Client>> Disable(Client client)
         {
             if (client == null) return new Data.DbResponse<Client>(null, Data.DbState.INVALID_INPUT);
             Data.DbState _status = Data.DbState.OK;
@@ -184,8 +188,9 @@ namespace API_Orders.Services
                 {
                     var dbClient = db.Clients.SingleOrDefault(x => x.ID_Client == client.ID_Client);
                     if (dbClient == null) return new Data.DbResponse<Client>(client, Data.DbState.NOT_FOUND);
+
                     dbClient.Disabled = true;
-                    db.SaveChanges();
+                    await db.SaveChangesAsync();
                 }
             } catch(Exception ex)
             {
@@ -201,9 +206,9 @@ namespace API_Orders.Services
         /// </summary>
         public class SearchArgument
         {
-            public string nom { get; set; }
-            public string telephone { get; set; }
-            public string email { get; set; }
+            public string? nom { get; set; }
+            public string? telephone { get; set; }
+            public string? email { get; set; }
         }
     }
 }

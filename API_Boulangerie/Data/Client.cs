@@ -19,6 +19,8 @@ namespace API_Orders
         public string? Email { get; set; }
         public string? Address { get; set; }
         public bool Disabled { get; set; }
+        [NotMapped]
+        public bool IsActive => !this.Disabled;
         public void Copy(Client other)
         {
             this.FullName = other.FullName;
@@ -32,10 +34,7 @@ namespace API_Orders
             return this.ID_Client > 0;
         }
 
-        public bool Active()
-        {
-            return !this.Disabled;
-        }
+        
 
         #region Database mapping
         public static ClientDTO FromBusinessObject(Client client)

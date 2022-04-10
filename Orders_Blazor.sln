@@ -10,7 +10,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "API_Orders", "API_Boulanger
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared_Orders", "Shared_Boulangerie\Shared_Orders.csproj", "{60AB798D-D837-499F-B718-91CA6B8847EB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazor_Orders", "Blazor_Boulangerie\Blazor_Orders.csproj", "{74BF51DF-04D9-49F5-875C-B47C65C13BC0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blazor_Orders", "Blazor_Boulangerie\Blazor_Orders.csproj", "{74BF51DF-04D9-49F5-875C-B47C65C13BC0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

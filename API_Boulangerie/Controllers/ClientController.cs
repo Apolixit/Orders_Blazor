@@ -21,7 +21,7 @@ namespace API_Orders.Controllers.api
         [Route("Get")]
         public ActionResult<ClientDTO> Get(int id)
         {
-            if (id <= 0) return null;
+            if (id <= 0) return BadRequest();
             try
             {
                 ClientDTO client = Client.Get(id);
